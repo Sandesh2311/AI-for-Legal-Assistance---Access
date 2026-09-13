@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { analyzeDocument, askDocumentQuestion, compareDocuments } from '../services/ai/client';
+import { analyzeDocument, askDocumentQuestion, compareDocuments, getApiBaseUrl } from '../services/ai/client';
 import { analysisPayload, comparisonPayload, qaPayload, validDocument } from './fixtures';
 
 describe('client AI service abstraction', () => {
@@ -13,6 +13,11 @@ describe('client AI service abstraction', () => {
     vi.useRealTimers();
   });
 
+  it('uses same-origin routes in production and the configured backend during development', () => {
+    expect(getApiBaseUrl(false)).toBe('');
+    expect(getApiBaseUrl(true)).toBe(import.meta.env.VITE_API_BASE_URL || '');
+  });
+
   it('posts analysis, comparison, and question payloads to API endpoints', async () => {
     const fetchMock = vi.mocked(fetch);
     fetchMock
@@ -24,9 +29,10 @@ describe('client AI service abstraction', () => {
     await expect(compareDocuments(validDocument, `${validDocument} revised`)).resolves.toEqual(comparisonPayload);
     await expect(askDocumentQuestion(validDocument, 'Can I terminate?')).resolves.toEqual(qaPayload);
 
-    expect(fetchMock).toHaveBeenNthCalledWith(1, expect.stringContaining('/api/analyze'), expect.objectContaining({ method: 'POST' }));
-    expect(fetchMock).toHaveBeenNthCalledWith(2, expect.stringContaining('/api/compare'), expect.objectContaining({ method: 'POST' }));
-    expect(fetchMock).toHaveBeenNthCalledWith(3, expect.stringContaining('/api/ask'), expect.objectContaining({ method: 'POST' }));
+    const apiBaseUrl = getApiBaseUrl();
+    expect(fetchMock).toHaveBeenNthCalledWith(1, `${apiBaseUrl}/api/analyze`, expect.objectContaining({ method: 'POST' }));
+    expect(fetchMock).toHaveBeenNthCalledWith(2, `${apiBaseUrl}/api/compare`, expect.objectContaining({ method: 'POST' }));
+    expect(fetchMock).toHaveBeenNthCalledWith(3, `${apiBaseUrl}/api/ask`, expect.objectContaining({ method: 'POST' }));
   });
 
   it('surfaces server errors without exposing internals', async () => {

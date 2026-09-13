@@ -17,6 +17,7 @@
     "vite.config.ts",
     "vitest.config.ts",
     "eslint.config.js",
+    "api/**/*.ts",
     "server/**/*.ts",
     "src/constants/**/*.ts",
     "src/services/chat/**/*.ts",

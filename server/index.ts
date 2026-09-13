@@ -83,7 +83,7 @@ async function withAiFallback<T extends { fallbackUsed: boolean }>(
 
 export const app = createServerApp();
 
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   app.listen(port, () => {
     console.log(`LexiGuide AI API listening on http://localhost:${port}`);
   });

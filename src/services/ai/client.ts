@@ -1,6 +1,10 @@
 import type { AnalysisResult, ComparisonResult, Language, QaResult } from '../../types/legal';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+export function getApiBaseUrl(isDevelopment = import.meta.env.DEV): string {
+  return isDevelopment ? import.meta.env.VITE_API_BASE_URL || '' : '';
+}
+
+const API_BASE_URL = import.meta.env.DEV ? import.meta.env.VITE_API_BASE_URL || '' : '';
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
   const controller = new AbortController();
